@@ -4,4 +4,4 @@ import * as cdk from '@aws-cdk/core';
 import { RestCrudStack } from '../lib/rest-crud-stack';
 
 const app = new cdk.App();
-new RestCrudStack(app, 'RestCrudStack');
+new RestCrudStack(app, 'RestCrudStack', { env: { region: 'ap-southeast-1' } });
