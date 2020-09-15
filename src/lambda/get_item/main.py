@@ -17,8 +17,8 @@ def handler(event, context):
     try:
         requested_item_id = event["pathParameters"]["id"]
         response = table.query(
-            ProjectionExpression="#a",
-            ExpressionAttributeNames={"#a": "a"},
+            ProjectionExpression="#company, #address",
+            ExpressionAttributeNames={"#company": "company", "#address": "address"},
             KeyConditionExpression=Key(PRIMARY_KEY).eq(requested_item_id)
         )
         return {

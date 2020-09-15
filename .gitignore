@@ -11,6 +11,7 @@ cdk.out
 .parcel-cache
 
 # Python envs
+python_modules
 .venv
 .idea
 
