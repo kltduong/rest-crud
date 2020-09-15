@@ -1,8 +1,8 @@
 import json
 import os
-import uuid
 
 import boto3
+from boto3.dynamodb.conditions import Key
 
 TABLE_NAME = os.environ["TABLE_NAME"]
 PRIMARY_KEY = os.environ["PRIMARY_KEY"]
@@ -15,33 +15,30 @@ table = DYNAMO_DB.Table(TABLE_NAME)
 def handler(event, context):
     print("event: ", event)
     try:
-        item = json.loads(event["body"])
-        item["itemId"] = str(uuid.uuid1())
-        table.put_item(Item=item)
+        requested_item_id = event["pathParameters"]["id"]
+        table.delete_item(
+            Key={PRIMARY_KEY: requested_item_id},
+        )
         res = {
             "statusCode": 200,
             "body": "success"
         }
         print(res)
         return res
-    except KeyError as e:
-        res = {
+    except KeyError:
+        return {
             "statusCode": 400,
-            "body": f"Error: invalid event format. {str(e)}"
+            "body": "Error: You are missing the path parameter id"
         }
-        print(res)
-        return res
     except Exception as e:
-        res = {
+        return {
             "statusCode": 500,
             "body": f"ERROR: {str(e)}"
         }
-        print(res)
-        return res
         
 
 if __name__ == "__main__":
-    event = {
-        "body": json.dumps({"company": "EVN", "address": "Q3", "year": 2005})
-    }
-    handler(event, {})
+    handler(
+        {'pathParameters': {'id': 'dc0a9d7e-f732-11ea-9cce-5d273170886c'}},
+        None
+    )

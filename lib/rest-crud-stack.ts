@@ -46,8 +46,8 @@ export class RestCrudStack extends cdk.Stack {
     fs.writeFileSync(path.resolve(envPath, '.env'),
       `TABLE_NAME=items\nPRIMARY_KEY=itemId`
     );
-    fs.writeFileSync(path.resolve(envPath, '.env'),
-      `EXPORT TABLE_NAME=items\nEXPORT PRIMARY_KEY=itemId`
+    fs.writeFileSync(path.resolve(envPath, 'env.sh'),
+      `export TABLE_NAME=items\nexport PRIMARY_KEY=itemId`
     );
 
     codePath = getLambdaPaths('get_items').codePath
@@ -64,11 +64,68 @@ export class RestCrudStack extends cdk.Stack {
       `TABLE_NAME=items`
     );
     fs.writeFileSync(path.resolve(envPath, 'env.sh'),
-      `EXPORT TABLE_NAME=items`
+      `export TABLE_NAME=items`
+    );
+    
+    codePath = getLambdaPaths('create_item').codePath
+    envPath = getLambdaPaths('create_item').envPath
+    const createItemLambda = new lambda.Function(this, 'createItemFunction', {
+      code: new lambda.AssetCode(codePath),
+      handler: 'main.handler',
+      runtime: lambda.Runtime.PYTHON_3_8,
+      environment: {
+        TABLE_NAME: dynamoTable.tableName,
+        PRIMARY_KEY: PRIMARY_KEY
+      }
+    });
+    fs.writeFileSync(path.resolve(envPath, '.env'),
+      `TABLE_NAME=items\nPRIMARY_KEY=itemId`
+    );
+    fs.writeFileSync(path.resolve(envPath, 'env.sh'),
+      `export TABLE_NAME=items\nexport PRIMARY_KEY=itemId`
+    );
+    
+    codePath = getLambdaPaths('update_item').codePath
+    envPath = getLambdaPaths('update_item').envPath
+    const updateItemLambda = new lambda.Function(this, 'updateItemFunction', {
+      code: new lambda.AssetCode(codePath),
+      handler: 'main.handler',
+      runtime: lambda.Runtime.PYTHON_3_8,
+      environment: {
+        TABLE_NAME: dynamoTable.tableName,
+        PRIMARY_KEY: PRIMARY_KEY
+      }
+    });
+    fs.writeFileSync(path.resolve(envPath, '.env'),
+      `TABLE_NAME=items\nPRIMARY_KEY=itemId`
+    );
+    fs.writeFileSync(path.resolve(envPath, 'env.sh'),
+      `export TABLE_NAME=items\nexport PRIMARY_KEY=itemId`
+    );
+    
+    codePath = getLambdaPaths('delete_item').codePath
+    envPath = getLambdaPaths('delete_item').envPath
+    const deleteItemLambda = new lambda.Function(this, 'deleteItemFunction', {
+      code: new lambda.AssetCode(codePath),
+      handler: 'main.handler',
+      runtime: lambda.Runtime.PYTHON_3_8,
+      environment: {
+        TABLE_NAME: dynamoTable.tableName,
+        PRIMARY_KEY: PRIMARY_KEY
+      }
+    });
+    fs.writeFileSync(path.resolve(envPath, '.env'),
+      `TABLE_NAME=items\nPRIMARY_KEY=itemId`
+    );
+    fs.writeFileSync(path.resolve(envPath, 'env.sh'),
+      `export TABLE_NAME=items\nexport PRIMARY_KEY=itemId`
     );
     
     dynamoTable.grantReadWriteData(getItemLambda);
     dynamoTable.grantReadWriteData(getItemsLambda);
+    dynamoTable.grantReadWriteData(createItemLambda);
+    dynamoTable.grantReadWriteData(updateItemLambda);
+    dynamoTable.grantReadWriteData(deleteItemLambda);
     
     const api = new apigateway.RestApi(this, 'itemsApi', {
       restApiName: "Items Service"
@@ -77,10 +134,16 @@ export class RestCrudStack extends cdk.Stack {
     const itemsResource = api.root.addResource('items');
     const getItemsIntegration = new apigateway.LambdaIntegration(getItemsLambda);
     itemsResource.addMethod('GET', getItemsIntegration);
+    const createItemIntegration = new apigateway.LambdaIntegration(createItemLambda);
+    itemsResource.addMethod('POST', createItemIntegration);
     
     const itemResource = itemsResource.addResource("{id}")
     const getItemIntegration = new apigateway.LambdaIntegration(getItemLambda);
     itemResource.addMethod("GET", getItemIntegration);
+    const updateItemIntegration = new apigateway.LambdaIntegration(updateItemLambda);
+    itemResource.addMethod("PATCH", updateItemIntegration);
+    const deleteItemIntegration = new apigateway.LambdaIntegration(deleteItemLambda);
+    itemResource.addMethod("DELETE", deleteItemIntegration);
     
     addCorsOptions(itemResource);
     addCorsOptions(itemsResource);
