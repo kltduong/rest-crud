@@ -11,7 +11,9 @@ cdk.out
 .parcel-cache
 
 # Python envs
-python_envs/
+.venv
+.idea
 
 # Env files
 env\.sh
+.env

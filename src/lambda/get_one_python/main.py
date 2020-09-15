@@ -3,7 +3,6 @@ import os
 
 import boto3
 from boto3.dynamodb.conditions import Key
-from botocore.exceptions import ClientError
 
 TABLE_NAME = os.environ["TABLE_NAME"]
 PRIMARY_KEY = os.environ["PRIMARY_KEY"]
